@@ -3,11 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -19,21 +17,29 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody Map<String, String> body) {
-        User user = authService.register(
-                body.get("username"),
-                body.get("password"),
-                body.get("email")
-        );
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
+        try {
+            User user = authService.register(
+                    body.get("username"),
+                    body.get("password"),
+                    body.get("email")
+            );
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody Map<String, String> body) {
-        User user = authService.login(
-                body.get("username"),
-                body.get("password")
-        );
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+        try {
+            User user = authService.login(
+                    body.get("username"),
+                    body.get("password")
+            );
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }

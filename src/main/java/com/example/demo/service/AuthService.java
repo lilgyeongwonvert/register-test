@@ -2,37 +2,25 @@ package com.example.demo.service;
 
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
+@RequiredArgsConstructor
 public class AuthService {
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
-    public User register(String username, String password, String email) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("Username already exists");
+    // 회원가입
+    public boolean register(User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            return false; // 이미 존재
         }
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setEmail(email);
-        return userRepository.save(user);
+        userRepository.save(user);
+        return true;
     }
 
-    public User login(String username, String password) {
-        Optional<User> userOptional = userRepository.findByUsername(username);
-        if (userOptional.isEmpty() || !passwordEncoder.matches(password, userOptional.get().getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-        return userOptional.get();
+    // 로그인
+    public boolean login(String username, String password) {
+        return userRepository.findByUsernameAndPassword(username, password).isPresent();
     }
 }

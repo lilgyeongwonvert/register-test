@@ -13,7 +13,7 @@ public class AuthService {
     // 회원가입
     public boolean register(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            return false; // 이미 존재
+            return false;
         }
         userRepository.save(user);
         return true;

@@ -3,48 +3,35 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
 
-@Controller
+import java.util.Map;
+
+@RestController
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
 
-    // 회원가입 폼
-    @GetMapping("/signup")
-    public String signupForm() {
-        return "signup"; // templates/signup.html
-    }
-
-    // 회원가입 처리
+    // 회원가입 API
     @PostMapping("/signup")
-    public String signup(@ModelAttribute User user, Model model) {
+    public ResponseEntity<?> signup(@RequestBody User user) {
         boolean result = authService.register(user);
         if (result) {
-            return "redirect:/login";
+            return ResponseEntity.ok(Map.of("result", "success"));
         } else {
-            model.addAttribute("error", "이미 존재하는 아이디입니다.");
-            return "signup";
+            return ResponseEntity.badRequest().body(Map.of("result", "fail", "error", "이미 존재하는 아이디입니다."));
         }
     }
 
-    // 로그인 폼
-    @GetMapping("/login")
-    public String loginForm() {
-        return "login"; // templates/login.html
-    }
-
-    // 로그인 처리
+    // 로그인 API
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password, Model model) {
-        boolean result = authService.login(username, password);
+    public ResponseEntity<?> login(@RequestBody Map<String, String> params) {
+        boolean result = authService.login(params.get("username"), params.get("password"));
         if (result) {
-            return "redirect:/";
+            return ResponseEntity.ok(Map.of("result", "success"));
         } else {
-            model.addAttribute("error", "로그인 실패");
-            return "login";
+            return ResponseEntity.status(401).body(Map.of("result", "fail", "error", "로그인 실패"));
         }
     }
 }
